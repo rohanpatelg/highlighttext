@@ -1,0 +1,15 @@
+console.log('background is running')
+
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.type === 'COUNT') {
+    console.log('background has received a message from popup, and count is ', request?.count)
+  }
+})
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+    console.log(
+      `Storage key "${key}" in namespace "${namespace}" changed.`,
+      `Old value was "${oldValue}", new value is "${newValue}".`
+    );
+  }
+});
