@@ -58,6 +58,7 @@ function getSelectionParentElement() {
 // find the index of the element among it's sibling and return it
 function findSiblingIndex(element, parent, arr) {
   const children = parent.children
+  console.log("child",children)
   const index = Array.prototype.indexOf.call(children, element)
   return index
 }
@@ -71,7 +72,7 @@ function findRelativeElement(element, arr) {
   let lastElement = element
 
   while (element.parentNode && !element.parentNode.id && element != document.body) {
-    console.log(element)
+    console.log(element,"ele")
     let index = 0
     lastElement = element
     element = element.parentNode
@@ -98,7 +99,9 @@ function findRelativeElement(element, arr) {
 // Function to save highlights to chrome local storage
 async function saveHighlight(id, arr) {
   console.log('saveddd');
+
   const gg = [...arr.reverse()];
+  gg.pop();
   gg.push(id)
   chrome.storage.local.get({ highlights: {} }, async (items) => {
     items.highlights[`${location.href}`] = items.highlights[`${location.href}`] || []
@@ -121,7 +124,7 @@ async function saveHighlight(id, arr) {
 // Function to load and reapply highlights from chrome local storage
 async function loadHighlights() {
   console.log('KK');
-  let range;
+ 
   await chrome.storage.local.get({ highlights: {} }, (items) => {
     console.log(items.highlights, 'tet')
     items.highlights[`${location.href}`]?.map((item) => {
@@ -136,31 +139,39 @@ async function loadHighlights() {
           }
           else{
             ele = document.getElementById(pageHighlight[0]);
-            
           }
-          while(i<pageHighlight.length-2){
-          ele=ele.childNodes[pageHighlight[i]]
-          console.log(ele)
-          i++;
+          console.log(ele,"after")
+          while(i<pageHighlight.length-2 && ele.childNodes.length){
+            if(ele.childNodes[pageHighlight[i]].nodeType===1){
+
+                console.log("pppp",pageHighlight[i],i)
+              ele=ele.childNodes[pageHighlight[i]]
+              console.log(ele,"while finding childnode")
+              i++;
+            }
+            else{
+                console.log("not ele")
+            }
       }
      
-      range=pageHighlight[pageHighlight.length-1];
-      findAndHighlightText(ele,range);
-    
+      const text=pageHighlight[pageHighlight.length-1];
+      findAndHighlightText(ele,text);
+
   })
 })
 }
 
 // highlight the text after reloading
 function findAndHighlightText(element, searchText) {
-    const innerHTML = element.innerHTML;
-    const index = innerHTML.indexOf(searchText);
+  
+
+    const index = element.innerHTML?.indexOf(searchText);
     if (index !== -1) {
-        element.innerHTML = innerHTML.substring(0, index) +
+        element.innerHTML = element.innerHTML.substring(0, index) +
                             "<span class='highlightedByUs' style='background-color:yellow'>" +
                             searchText +
                             "</span>" +
-                            innerHTML.substring(index + searchText.length);
+                            element.innerHTML.substring(index + searchText.length);
                             
     }
 }
